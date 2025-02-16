@@ -1,23 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
-import '@mantine/core/styles.css';
-import { ColorSchemeScript } from '@mantine/core';
-import Providers from "./providers";
+import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
-  title: "Library",
-  description: "Library management system",
+  title: "BookShelf",
+  description: "Sistema de Gerenciamento de Biblioteca",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -26,14 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-mantine-color-scheme="light">
+    <html lang="pt-BR" data-mantine-color-scheme="light">
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
+      <body className={poppins.className}>
+        <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
       </body>
     </html>
   );
