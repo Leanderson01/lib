@@ -41,26 +41,26 @@
             - [X] Botão de cadastro
  
 ### Tela Home
-- [ ] Criar tela home
-    - [ ] Background cor #F7F1E1
-    - [ ] Header
-        - [ ] Background cor #303A6B
-        - [ ] Logo
-        - [ ] Ícone de usuário
-    - [ ] Seção Livros
-        - [ ] Grid com 5 cards de livros(quando clicar no card aparece o modal de reservar)
-        - [ ] Botão ao lado desse grid "Ver mais"
-    - [ ] Seção de categorias
-        - [ ] Grid com 5 cards de categorias(quando clicar no card me leva para a tela de livros da categoria)
-        - [ ] Botão ao lado desse grid "Ver mais"
-    - [ ] Seção de autores
-        - [ ] Grid com 5 cards de autores(quando clicar no card me leva para a tela de livros do autor)
-        - [ ] Botão ao lado desse grid "Ver mais"
-    - [ ] Footer
-        - [ ] Background cor #303A6B
-        - [ ] Texto branco
-        - [ ] Logo
-        - [ ] Texto "Todos os direitos reservados"
+- [X] Criar tela home
+    - [X] Background cor #F7F1E1
+    - [X] Header
+        - [X] Background cor #303A6B
+        - [X] Logo
+        - [X] Ícone de usuário
+    - [X] Seção Livros
+        - [X] Grid com 5 cards de livros(quando clicar no card aparece o modal de reservar)
+        - [X] Botão ao lado desse grid "Ver mais"
+    - [X] Seção de categorias
+        - [X] Grid com 5 cards de categorias(quando clicar no card me leva para a tela de livros da categoria)
+        - [X] Botão ao lado desse grid "Ver mais"
+    - [X] Seção de autores
+        - [X] Grid com 5 cards de autores(quando clicar no card me leva para a tela de livros do autor)
+        - [X] Botão ao lado desse grid "Ver mais"
+    - [X] Footer
+        - [X] Background cor #303A6B
+        - [X] Texto branco
+        - [X] Logo
+        - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Livros
 - [ ] Criar tela de livros
