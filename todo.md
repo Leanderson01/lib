@@ -10,35 +10,35 @@
 - Tela de Minhas Reservas
 
 ### Tela de Login
-- [ ] Criar tela de login
-    - [ ] Background cor #E3EBF6
-    - [ ] Card branco centralizado com borda arredondada, sombra
-    - [ ] Logo no topo do card
-    - [ ] Formulário de login 
-        - [ ] Email
-        - [ ] Senha
-        - [ ] Botão de login
-        - [ ] Separador de linha
-        - [ ] Botão de cadastro
+- [X] Criar tela de login
+    - [X] Background cor #E3EBF6
+    - [X] Card branco centralizado com borda arredondada, sombra
+    - [X] Logo no topo do card
+    - [X] Formulário de login 
+        - [X] Email
+        - [X] Senha
+        - [X] Botão de login
+        - [X] Separador de linha
+        - [X] Botão de cadastro
 
 
 ### Tela de Cadastro
-- [ ] Criar tela de cadastro
-    - [ ] Background cor #E3EBF6
-    - [ ] Card branco centralizado com borda arredondada, sombra
-    - [ ] Logo no topo do card
-    - [ ] Formulário de cadastro (Stepper)
-        - [ ] Passo 1
-            - [ ] Nome
-            - [ ] Email Principal
-            - [ ] Email Secundário
-        - [ ] Passo 2
-            - [ ] Número de telefone principal 
-            - [ ] Número de telefone secundário
-        - [ ] Passo 3
-            - [ ] Senha
-            - [ ] Confirmar senha
-            - [ ] Botão de cadastro
+- [X] Criar tela de cadastro
+    - [X] Background cor #E3EBF6
+    - [X] Card branco centralizado com borda arredondada, sombra
+    - [X] Logo no topo do card
+    - [X] Formulário de cadastro (Stepper)
+        - [X] Passo 1
+            - [X] Nome
+            - [X] Email Principal
+            - [X] Email Secundário
+        - [X] Passo 2
+            - [X] Número de telefone principal 
+            - [X] Número de telefone secundário
+        - [X] Passo 3
+            - [X] Senha
+            - [X] Confirmar senha
+            - [X] Botão de cadastro
  
 ### Tela Home
 - [ ] Criar tela home
