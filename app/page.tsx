@@ -6,12 +6,23 @@ import { BookCard } from "./components/cards/BookCard";
 import { CategoryCard } from "./components/cards/CategoryCard";
 import { AuthorCard } from "./components/cards/AuthorCard";
 import { SeeMoreButton } from "./components/buttons/SeeMoreButton";
+import { ReserveBookModal } from "./components/modals/ReserveBookModal";
+import { useState } from "react";
 
 export default function Home() {
+  const [modalOpened, setModalOpened] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<{
+    title: string;
+    publishYear: string;
+    publisher: string;
+  } | null>(null);
+
   // Mock data
   const mockBooks = Array(5).fill({
     title: "Título do Livro",
     author: "Nome do Autor",
+    publishYear: "2024",
+    publisher: "Editora Example",
     cover: "/placeholder.jpg"
   });
 
@@ -25,11 +36,20 @@ export default function Home() {
     image: "/placeholder.jpg"
   });
 
+  const handleBookClick = (book: typeof mockBooks[0]) => {
+    setSelectedBook({
+      title: book.title,
+      publishYear: book.publishYear,
+      publisher: book.publisher
+    });
+    setModalOpened(true);
+  };
+
   return (
-    <div className="min-h-screen bg-[#F7F1E1]">
+    <div className="min-h-screen bg-[#F7F1E1] flex flex-col">
       <Header />
 
-      <main className="container mx-auto py-8 px-4 space-y-12">
+      <main className="flex-1 container mx-auto py-8 px-4 space-y-12">
         {/* Livros Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
@@ -42,7 +62,7 @@ export default function Home() {
                 key={index}
                 title={book.title}
                 author={book.author}
-                onClick={() => console.log('Clicou no livro:', index)}
+                onClick={() => handleBookClick(book)}
               />
             ))}
           </div>
@@ -84,6 +104,17 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      {selectedBook && (
+        <ReserveBookModal
+          opened={modalOpened}
+          onClose={() => {
+            setModalOpened(false);
+            setSelectedBook(null);
+          }}
+          bookData={selectedBook}
+        />
+      )}
     </div>
   );
 }

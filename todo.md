@@ -63,20 +63,20 @@
         - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Livros
-- [ ] Criar tela de livros
-    - [ ] Background cor #F7F1E1
-    - [ ] Header
-        - [ ] Background cor #303A6B
-        - [ ] Logo
-        - [ ] Ícone de usuário
-    - [ ] Botão de voltar
-    - [ ] Seção de livros
-        - [ ] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
-    - [ ] Footer
-        - [ ] Background cor #303A6B
-        - [ ] Texto branco
-        - [ ] Logo
-        - [ ] Texto "Todos os direitos reservados"
+- [X] Criar tela de livros
+    - [X] Background cor #F7F1E1
+    - [X] Header
+        - [X] Background cor #303A6B
+        - [X] Logo
+        - [X] Ícone de usuário
+    - [X] Botão de voltar
+    - [X] Seção de livros
+        - [X] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
+    - [X] Footer
+        - [X] Background cor #303A6B
+        - [X] Texto branco
+        - [X] Logo
+        - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Autores
 - [ ] Criar tela de livros do autor
