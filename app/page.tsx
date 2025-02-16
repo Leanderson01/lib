@@ -8,8 +8,10 @@ import { AuthorCard } from "./components/cards/AuthorCard";
 import { SeeMoreButton } from "./components/buttons/SeeMoreButton";
 import { ReserveBookModal } from "./components/modals/ReserveBookModal";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<{
     title: string;
@@ -18,23 +20,26 @@ export default function Home() {
   } | null>(null);
 
   // Mock data
-  const mockBooks = Array(5).fill({
+  const mockBooks = Array(5).fill(null).map((_, index) => ({
+    id: index + 1,
     title: "Título do Livro",
     author: "Nome do Autor",
     publishYear: "2024",
     publisher: "Editora Example",
     cover: "/placeholder.jpg"
-  });
+  }));
 
-  const mockCategories = Array(4).fill({
+  const mockCategories = Array(4).fill(null).map((_, index) => ({
+    id: index + 1,
     name: "Nome da Categoria",
     image: "/placeholder.jpg"
-  });
+  }));
 
-  const mockAuthors = Array(5).fill({
+  const mockAuthors = Array(5).fill(null).map((_, index) => ({
+    id: index + 1,
     name: "Nome do Autor",
     image: "/placeholder.jpg"
-  });
+  }));
 
   const handleBookClick = (book: typeof mockBooks[0]) => {
     setSelectedBook({
@@ -45,6 +50,14 @@ export default function Home() {
     setModalOpened(true);
   };
 
+  const handleCategoryClick = (id: number) => {
+    router.push(`/categories/${id}`);
+  };
+
+  const handleAuthorClick = (id: number) => {
+    router.push(`/authors/${id}`);
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F1E1] flex flex-col">
       <Header />
@@ -53,13 +66,13 @@ export default function Home() {
         {/* Livros Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <Text size="xl" fw={700}>Livros</Text>
+            <Text size="xl" fw={700} className="!text-[#555F73]">Livros</Text>
             <SeeMoreButton redirectTo="books" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockBooks.map((book, index) => (
+            {mockBooks.map((book) => (
               <BookCard
-                key={index}
+                key={book.id}
                 title={book.title}
                 author={book.author}
                 onClick={() => handleBookClick(book)}
@@ -71,15 +84,16 @@ export default function Home() {
         {/* Categorias Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <Text size="xl" fw={700}>Categorias</Text>
+            <Text size="xl" fw={700} className="!text-[#303A6B]">Categorias</Text>
             <SeeMoreButton redirectTo="categories" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {mockCategories.map((category, index) => (
+            {mockCategories.map((category) => (
               <CategoryCard
-                key={index}
+                key={category.id}
+                id={category.id}
                 name={category.name}
-                onClick={() => console.log('Clicou na categoria:', index)}
+                onClick={() => handleCategoryClick(category.id)}
               />
             ))}
           </div>
@@ -88,15 +102,16 @@ export default function Home() {
         {/* Autores Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <Text size="xl" fw={700}>Autores</Text>
+            <Text size="xl" fw={700} className="!text-[#303A6B]">Autores</Text>
             <SeeMoreButton redirectTo="authors" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockAuthors.map((author, index) => (
+            {mockAuthors.map((author) => (
               <AuthorCard
-                key={index}
+                key={author.id}
+                id={author.id}
                 name={author.name}
-                onClick={() => console.log('Clicou no autor:', index)}
+                onClick={handleAuthorClick}
               />
             ))}
           </div>
