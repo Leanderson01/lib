@@ -1,13 +1,13 @@
 # My Library
 
 ## Telas
-- Tela de Login
-- Tela de Cadastro
-- Tela Home
-- Tela de Livros
-- Tela de Autores
-- Tela de Categorias
-- Tela de Minhas Reservas
+- Tela de Login 
+- Tela de Cadastro 
+- Tela Home 
+- Tela de Livros 
+- Tela de Autores 
+- Tela de Categorias 
+- Tela de Minhas Reservas 
 
 ### Tela de Login
 - [X] Criar tela de login
@@ -79,90 +79,90 @@
         - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Autores
-- [ ] Criar tela de livros do autor
-    - [ ] Background cor #F7F1E1
-    - [ ] Header
-        - [ ] Background cor #303A6B
-        - [ ] Logo
-        - [ ] Ícone de usuário
-    - [ ] Botão de voltar
-    - [ ] Seção de livros
-        - [ ] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
-    - [ ] Footer
-        - [ ] Background cor #303A6B
-        - [ ] Texto branco
-        - [ ] Logo
-        - [ ] Texto "Todos os direitos reservados"
+- [X] Criar tela de livros do autor
+    - [X] Background cor #F7F1E1
+    - [X] Header
+        - [X] Background cor #303A6B
+        - [X] Logo
+        - [X] Ícone de usuário
+    - [X] Botão de voltar
+    - [X] Seção de livros
+        - [X] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
+    - [X] Footer
+        - [X] Background cor #303A6B
+        - [X] Texto branco
+        - [X] Logo
+        - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Categorias
-- [ ] Criar tela de livros da categoria
-    - [ ] Background cor #F7F1E1
-    - [ ] Header
-        - [ ] Background cor #303A6B
-        - [ ] Logo
-        - [ ] Ícone de usuário
-    - [ ] Botão de voltar
-    - [ ] Seção de livros
-        - [ ] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
-    - [ ] Footer
-        - [ ] Background cor #303A6B
-        - [ ] Texto branco
-        - [ ] Logo
-        - [ ] Texto "Todos os direitos reservados"
+- [X] Criar tela de livros da categoria
+    - [X] Background cor #F7F1E1
+    - [X] Header
+        - [X] Background cor #303A6B
+        - [X] Logo
+        - [X] Ícone de usuário
+    - [X] Botão de voltar
+    - [X] Seção de livros
+        - [X] Grid com 5 cards de livros por linha(quando clicar no card aparece o modal de reservar)
+    - [X] Footer
+        - [X] Background cor #303A6B
+        - [X] Texto branco
+        - [X] Logo
+        - [X] Texto "Todos os direitos reservados"
 
 ### Tela de Minhas Reservas
-- [ ] Criar tela de minhas reservas
-    - [ ] Background cor #F7F1E1
-    - [ ] Header
-        - [ ] Background cor #303A6B
-        - [ ] Logo
-        - [ ] Ícone de usuário
-    - [ ] Botão de voltar
-    - [] Seção de usuário
-        - [ ] Icone de Avatar
-        - [ ] Nome do usuário
-        - [ ] Email Principal do usuário
-        - [ ] Email Secundário do usuário
-        - [ ] Número de telefone principal do usuário
-        - [ ] Número de telefone secundário do usuário
-    - [ ] Seção de reservas
-        - [ ] Table com as reservas do usuário
-            - [ ] Coluna 1: Título
-            - [ ] Coluna 2: Data de Reserva
-            - [ ] Coluna 3: Data de Entrega
-            - [ ] Coluna 4: Ações (Cancelar Reserva)
-    - [ ] Footer
-        - [ ] Background cor #303A6B
-        - [ ] Texto branco
-        - [ ] Logo
-        - [ ] Texto "Todos os direitos reservados"
+- [X] Criar tela de minhas reservas
+    - [X] Background cor #F7F1E1
+    - [X] Header
+        - [X] Background cor #303A6B
+        - [X] Logo
+        - [X] Ícone de usuário
+    - [X] Botão de voltar
+    - [X] Seção de usuário
+        - [X] Icone de Avatar
+        - [X] Nome do usuário
+        - [X] Email Principal do usuário
+        - [X] Email Secundário do usuário
+        - [X] Número de telefone principal do usuário
+        - [X] Número de telefone secundário do usuário
+    - [X] Seção de reservas
+        - [X] Table com as reservas do usuário
+            - [X] Coluna 1: Título
+            - [X] Coluna 2: Data de Reserva
+            - [X] Coluna 3: Data de Entrega
+            - [X] Coluna 4: Ações (Cancelar Reserva)
+    - [X] Footer
+        - [X] Background cor #303A6B
+        - [X] Texto branco
+        - [X] Logo
+        - [X] Texto "Todos os direitos reservados"
 
 ### Modal de Reservar
-- [ ] Criar modal de reservar
-    - [ ] Background branco
-    - [ ] Card com borda arredondada, sombra
-    - [ ] Passo 1
-    - [ ] Título "Deseja reservar?"
-    - [ ] Imagem do livro
-    - [ ] Título do livro
-    - [ ] Autor do livro
-    - [ ] Botão de não vermelho, sai do modal
-    - [ ] Botão de sim verde, vai para o proximo passo
-    - [ ] Passo 2
-        - [ ] Formulário de reserva
-            - [ ] Título "Selecione as datas"
-            - [ ] Data de reserva
-            - [ ] Data de entrega
-        - [ ] Botão de cancelar vermelho, sai do modal
-        - [ ] Botão de reservar verde, reserva o livro
+- [X] Criar modal de reservar
+    - [X] Background branco
+    - [X] Card com borda arredondada, sombra
+    - [X] Passo 1
+    - [X] Título "Deseja reservar?"
+    - [X] Imagem do livro
+    - [X] Título do livro
+    - [X] Autor do livro
+    - [X] Botão de não vermelho, sai do modal
+    - [X] Botão de sim verde, vai para o proximo passo
+    - [X] Passo 2
+        - [X] Formulário de reserva
+            - [X] Título "Selecione as datas"
+            - [X] Data de reserva
+            - [X] Data de entrega
+        - [X] Botão de cancelar vermelho, sai do modal
+        - [X] Botão de reservar verde, reserva o livro
 
 ### Modal de Cancelar Reserva
-- [ ] Criar modal de cancelar reserva
-    - [ ] Background branco
-    - [ ] Card com borda arredondada, sombra
-    - [ ] Título "Deseja cancelar a reserva?"
-    - [ ] Botão de cancelar vermelho, sai do modal
-    - [ ] Botão de sim verde, cancela a reserva
+- [X] Criar modal de cancelar reserva
+    - [X] Background branco
+    - [X] Card com borda arredondada, sombra
+    - [X] Título "Deseja cancelar a reserva?"
+    - [X] Botão de cancelar vermelho, sai do modal
+    - [X] Botão de sim verde, cancela a reserva
 
 ## Importante
 - Iremos usar o use-form para criar os formulários
