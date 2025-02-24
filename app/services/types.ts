@@ -1,35 +1,46 @@
 export interface Usuario {
-  id: number;
+  usuario_id: number;
   nome: string;
-  email_principal: string;
-  email_secundario: string;
-  telefone_principal: string;
-  telefone_secundario: string;
+  email: string;
+  telefone: string | null;
 }
 
 export interface Livro {
-  id: number;
+  livro_id: number;
   titulo: string;
-  ano_publicacao: number;
-  editora: string;
-  categoria_id: number;
+  ano_publicacao: number | null;
+  editora: string | null;
+  categoria_id: number | null;
 }
 
 export interface Autor {
-  id: number;
+  autor_id: number;
   nome: string;
-  nacionalidade: string;
+  nacionalidade: string | null;
 }
 
 export interface Categoria {
-  id: number;
+  categoria_id: number;
   nome: string;
 }
 
 export interface Reserva {
-  id: number;
+  reserva_id: number;
+  usuario_id: number | null;
+  livro_id: number | null;
+  data_reserva: string | null;
+  status: string | null;
+}
+
+export interface Emprestimo {
+  emprestimo_id: number;
+  reserva_id: number | null;
+  data_emprestimo: string;
+  data_devolucao_prevista: string;
+  data_devolucao_real: string | null;
+}
+
+export interface LivroAutor {
   livro_id: number;
-  usuario_id: number;
-  data_reserva: string;
-  data_entrega: string;
+  autor_id: number;
 } 

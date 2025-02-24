@@ -1,15 +1,17 @@
 import { api } from './api';
-import { Reserva } from './types';
+import { Reserva, Livro } from './types';
+
+interface ReservaComLivro extends Reserva {
+  livro: Livro;
+}
 
 interface CriarReservaData {
   livro_id: number;
-  data_reserva: string;
-  data_entrega: string;
 }
 
 export const reservasService = {
   async listarMinhasReservas() {
-    const response = await api.get<Reserva[]>('/reservas');
+    const response = await api.get<ReservaComLivro[]>('/reservas');
     return response.data;
   },
 
@@ -19,7 +21,9 @@ export const reservasService = {
   },
 
   async cancelar(id: number) {
-    const response = await api.delete(`/reservas/${id}`);
+    const response = await api.patch<Reserva>(`/reservas/${id}`, {
+      status: 'CANCELADA'
+    });
     return response.data;
   }
 }; 

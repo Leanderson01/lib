@@ -1,4 +1,5 @@
 import { api } from './api';
+import { Usuario } from './types';
 
 interface LoginData {
   email: string;
@@ -7,21 +8,18 @@ interface LoginData {
 
 interface CadastroData {
   nome: string;
-  email_principal: string;
-  email_secundario: string;
-  telefone_principal: string;
-  telefone_secundario: string;
-  senha: string;
+  email: string;
+  telefone?: string;
 }
 
 export const authService = {
   async login(data: LoginData) {
-    const response = await api.post('/auth/login', data);
+    const response = await api.post<{ token: string; user: Usuario }>('/auth/login', data);
     return response.data;
   },
 
   async cadastro(data: CadastroData) {
-    const response = await api.post('/auth/registro', data);
+    const response = await api.post<Usuario>('/auth/registro', data);
     return response.data;
   }
 }; 
