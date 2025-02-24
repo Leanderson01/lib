@@ -95,15 +95,43 @@ app.post('/auth/login', async (req, res) => {
 
 app.post('/auth/registro', async (req, res) => {
   try {
-    const { nome, email_principal, email_secundario, telefone_principal, telefone_secundario, senha } = req.body;
-    await pool.execute(
-      'INSERT INTO usuarios (nome, email_principal, email_secundario, telefone_principal, telefone_secundario, senha) VALUES (?, ?, ?, ?, ?, ?)',
-      [nome, email_principal, email_secundario, telefone_principal, telefone_secundario, senha]
+    const { nome, email, telefone } = req.body;
+    
+    // Verificar se o email já existe
+    const [existingUser] = await pool.execute(
+      'SELECT * FROM Usuario WHERE email = ?',
+      [email]
     );
-    res.json({ message: 'Usuário cadastrado com sucesso' });
+
+    if (Array.isArray(existingUser) && existingUser.length > 0) {
+      return res.status(400).json({ 
+        message: 'Este email já está cadastrado. Por favor, use outro email.' 
+      });
+    }
+
+    // Garantir que telefone seja null se estiver vazio ou undefined
+    const telefoneValue = telefone || null;
+
+    // Inserir novo usuário
+    const [result] = await pool.execute(
+      'INSERT INTO Usuario (nome, email, telefone) VALUES (?, ?, ?)',
+      [nome, email, telefoneValue]
+    );
+
+    res.json({ 
+      message: 'Usuário cadastrado com sucesso!',
+      user: {
+        usuario_id: (result as any).insertId,
+        nome,
+        email,
+        telefone: telefoneValue
+      }
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao cadastrar usuário' });
+    console.error('Erro ao cadastrar usuário:', error);
+    res.status(500).json({ 
+      message: 'Erro ao cadastrar usuário. Tente novamente mais tarde.' 
+    });
   }
 });
 
