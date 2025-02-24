@@ -1,37 +1,67 @@
 "use client";
-import {
-  TextInput,
-  PasswordInput,
-  Button,
-  Card,
-  Text,
-  Divider,
-} from "@mantine/core";
+
+import { TextInput, Button, Card, Text, Divider } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useMutation } from "@tanstack/react-query";
+import { authService } from "@/app/services";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import Image from "next/image";
+import { notifications } from '@mantine/notifications';
+import Providers from "@/app/providers";
+
 interface FormValues {
   email: string;
-  password: string;
 }
 
-export default function Login() {
+function LoginForm() {
+  const router = useRouter();
+
   const form = useForm<FormValues>({
     initialValues: {
       email: "",
-      password: "",
     },
     validate: {
       email: (value: string) =>
         /^\S+@\S+$/.test(value) ? null : "Email inválido",
-      password: (value: string) =>
-        value.length < 6 ? "A senha deve ter pelo menos 6 caracteres" : null,
+    },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: (data: FormValues) => authService.login({ email: data.email, senha: '' }),
+    onSuccess: (data) => {
+      // Armazenar o token
+      localStorage.setItem('token', data.token);
+      
+      // Mostrar notificação de sucesso
+      notifications.show({
+        title: 'Login realizado com sucesso!',
+        message: 'Redirecionando para a página inicial...',
+        color: 'green',
+      });
+
+      // Redirecionar para a home
+      router.push('/');
+    },
+    onError: (error) => {
+      // Mostrar notificação de erro
+      notifications.show({
+        title: 'Erro ao fazer login',
+        message: error instanceof Error 
+          ? error.message 
+          : 'Não foi possível fazer login. Tente novamente.',
+        color: 'red',
+        autoClose: 5000,
+      });
+
+      // Limpar o formulário
+      form.reset();
     },
   });
 
   const handleSubmit = form.onSubmit((values: FormValues) => {
-    console.log("Dados do formulário:", values);
+    loginMutation.mutate(values);
   });
 
   return (
@@ -58,20 +88,16 @@ export default function Login() {
               placeholder="alex@email.com"
               {...form.getInputProps("email")}
               rightSection={<Mail size={16} />}
-            />
-
-            <PasswordInput
-              label="Senha"
-              placeholder="Digite sua senha!"
-              {...form.getInputProps("password")}
+              disabled={loginMutation.isPending}
             />
 
             <Button
               fullWidth
               type="submit"
               className="!bg-[#303A6B] hover:!bg-[#252d54]"
+              loading={loginMutation.isPending}
             >
-              Login
+              {loginMutation.isPending ? 'Entrando...' : 'Login'}
             </Button>
 
             <Divider label="OR" labelPosition="center" my="md" />
@@ -82,6 +108,7 @@ export default function Login() {
               variant="outline"
               fullWidth
               color="gray"
+              disabled={loginMutation.isPending}
             >
               Cadastre-se Agora!
             </Button>
@@ -89,5 +116,13 @@ export default function Login() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Providers>
+      <LoginForm />
+    </Providers>
   );
 }

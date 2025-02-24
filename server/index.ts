@@ -63,20 +63,33 @@ pool.getConnection()
 // Rotas de Autenticação
 app.post('/auth/login', async (req, res) => {
   try {
-    const { email, senha } = req.body;
+    const { email } = req.body;
     const [rows] = await pool.execute(
-      'SELECT * FROM usuarios WHERE email_principal = ? AND senha = ?',
-      [email, senha]
+      'SELECT * FROM Usuario WHERE email = ?',
+      [email]
     );
     
     if (Array.isArray(rows) && rows.length > 0) {
-      res.json({ token: 'jwt_token_aqui', user: rows[0] });
+      const user = rows[0];
+      res.json({ 
+        token: 'jwt_token_aqui', 
+        user: {
+          usuario_id: user.usuario_id,
+          nome: user.nome,
+          email: user.email,
+          telefone: user.telefone
+        }
+      });
     } else {
-      res.status(401).json({ message: 'Credenciais inválidas' });
+      res.status(401).json({ 
+        message: 'Email não encontrado. Verifique suas credenciais ou cadastre-se.' 
+      });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao fazer login' });
+    console.error('Erro ao fazer login:', error);
+    res.status(500).json({ 
+      message: 'Erro ao processar login. Tente novamente mais tarde.' 
+    });
   }
 });
 

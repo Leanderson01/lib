@@ -26,17 +26,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.code === 'ERR_NETWORK') {
-      console.error('Erro de conexão com o servidor:', error);
       throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão ou se o servidor está online.');
     }
     
     if (error.response?.status === 401) {
-      console.error('Erro de autenticação:', error.response.data);
-      throw new Error('Credenciais inválidas. Verifique seu usuário e senha.');
+      throw new Error(error.response.data.message || 'Credenciais inválidas');
     }
 
     if (error.response) {
-      console.error('Erro na resposta do servidor:', error.response.data);
       throw new Error(error.response.data.message || 'Erro ao processar a requisição');
     }
     
