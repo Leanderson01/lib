@@ -164,6 +164,29 @@
     - [X] Botão de cancelar vermelho, sai do modal
     - [X] Botão de sim verde, cancela a reserva
 
+## Integração com API
+- [ ] Criar integração com API
+    - [ ] Login
+    - [ ] Cadastro
+    - [ ] Reservas
+    - [ ] Cancelar Reserva
+    - [ ] Livros
+    - [ ] Autores
+    - [ ] Categorias
+
+## Etapas para integração com API
+- [] Criar uma pasta chamada "services"
+- [] Criar um arquivo chamado "api.ts"
+- [] Criar funções para cada uma das operações que iremos precisar
+    - [] Login
+    - [] Cadastro
+    - [] Reservas
+    - [] Cancelar Reserva
+    - [] Livros
+    - [] Autores
+    - [] Categorias
+- [] Substituir as mocks de dados por chamadas à API
+
 ## Importante
 - Iremos usar o use-form para criar os formulários
 - Atente-se ao API-MANUAL para a forma de uso da API do back-end
