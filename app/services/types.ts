@@ -11,6 +11,8 @@ export interface Livro {
   ano_publicacao: number | null;
   editora: string | null;
   categoria_id: number | null;
+  categoria_nome?: string;
+  autores?: Autor[];
 }
 
 export interface Autor {

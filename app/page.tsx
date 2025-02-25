@@ -9,44 +9,46 @@ import { SeeMoreButton } from "./components/buttons/SeeMoreButton";
 import { ReserveBookModal } from "./components/modals/ReserveBookModal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { livrosService, autoresService, categoriasService } from "./services";
+import { Livro } from "./services/types";
+import Providers from "./providers";
 
-export default function Home() {
+function HomePage() {
   const router = useRouter();
   const [modalOpened, setModalOpened] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<{
-    title: string;
-    publishYear: string;
-    publisher: string;
-  } | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Livro | null>(null);
 
-  // Mock data
-  const mockBooks = Array(5).fill(null).map((_, index) => ({
-    id: index + 1,
-    title: "Título do Livro",
-    author: "Nome do Autor",
-    publishYear: "2024",
-    publisher: "Editora Example",
-    cover: "/placeholder.jpg"
-  }));
+  // Buscar dados reais do servidor
+  const { data: livros = [], isLoading: isLoadingLivros } = useQuery({
+    queryKey: ['livros'],
+    queryFn: livrosService.listarTodos
+  });
 
-  const mockCategories = Array(4).fill(null).map((_, index) => ({
-    id: index + 1,
-    name: "Nome da Categoria",
-    image: "/placeholder.jpg"
-  }));
+  const { data: categorias = [], isLoading: isLoadingCategorias } = useQuery({
+    queryKey: ['categorias'],
+    queryFn: categoriasService.listarTodas
+  });
 
-  const mockAuthors = Array(5).fill(null).map((_, index) => ({
-    id: index + 1,
-    name: "Nome do Autor",
-    image: "/placeholder.jpg"
-  }));
+  const { data: autores = [], isLoading: isLoadingAutores } = useQuery({
+    queryKey: ['autores'],
+    queryFn: autoresService.listarTodos
+  });
 
-  const handleBookClick = (book: typeof mockBooks[0]) => {
-    setSelectedBook({
-      title: book.title,
-      publishYear: book.publishYear,
-      publisher: book.publisher
-    });
+  // Função para obter o nome do autor principal
+  const getMainAuthorName = (livro: Livro) => {
+    if (livro.autores && livro.autores.length > 0) {
+      return livro.autores[0].nome;
+    }
+    return "Autor desconhecido";
+  };
+
+  console.log(livros);
+  console.log(autores);
+  console.log(categorias);
+
+  const handleBookClick = (livro: Livro) => {
+    setSelectedBook(livro);
     setModalOpened(true);
   };
 
@@ -70,14 +72,20 @@ export default function Home() {
             <SeeMoreButton redirectTo="books" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                title={book.title}
-                author={book.author}
-                onClick={() => handleBookClick(book)}
-              />
-            ))}
+            {isLoadingLivros ? (
+              <div className="col-span-full text-center py-8">Carregando livros...</div>
+            ) : livros.length === 0 ? (
+              <div className="col-span-full text-center py-8">Nenhum livro encontrado</div>
+            ) : (
+              livros.slice(0, 5).map((livro) => (
+                <BookCard
+                  key={livro.livro_id}
+                  title={livro.titulo}
+                  author={getMainAuthorName(livro)}
+                  onClick={() => handleBookClick(livro)}
+                />
+              ))
+            )}
           </div>
         </section>
 
@@ -88,14 +96,20 @@ export default function Home() {
             <SeeMoreButton redirectTo="categories" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {mockCategories.map((category) => (
-              <CategoryCard
-                key={category.id}
-                id={category.id}
-                name={category.name}
-                onClick={() => handleCategoryClick(category.id)}
-              />
-            ))}
+            {isLoadingCategorias ? (
+              <div className="col-span-full text-center py-8">Carregando categorias...</div>
+            ) : categorias.length === 0 ? (
+              <div className="col-span-full text-center py-8">Nenhuma categoria encontrada</div>
+            ) : (
+              categorias.slice(0, 4).map((categoria) => (
+                <CategoryCard
+                  key={categoria.categoria_id}
+                  id={categoria.categoria_id}
+                  name={categoria.nome}
+                  onClick={() => handleCategoryClick(categoria.categoria_id)}
+                />
+              ))
+            )}
           </div>
         </section>
 
@@ -106,14 +120,20 @@ export default function Home() {
             <SeeMoreButton redirectTo="authors" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {mockAuthors.map((author) => (
-              <AuthorCard
-                key={author.id}
-                id={author.id}
-                name={author.name}
-                onClick={handleAuthorClick}
-              />
-            ))}
+            {isLoadingAutores ? (
+              <div className="col-span-full text-center py-8">Carregando autores...</div>
+            ) : autores.length === 0 ? (
+              <div className="col-span-full text-center py-8">Nenhum autor encontrado</div>
+            ) : (
+              autores.slice(0, 5).map((autor) => (
+                <AuthorCard
+                  key={autor.autor_id}
+                  id={autor.autor_id}
+                  name={autor.nome}
+                  onClick={handleAuthorClick}
+                />
+              ))
+            )}
           </div>
         </section>
       </main>
@@ -127,9 +147,22 @@ export default function Home() {
             setModalOpened(false);
             setSelectedBook(null);
           }}
-          bookData={selectedBook}
+          bookData={{
+            title: selectedBook.titulo,
+            publishYear: selectedBook.ano_publicacao?.toString() || "Ano desconhecido",
+            publisher: selectedBook.editora || "Editora desconhecida",
+            authors: selectedBook.autores ? selectedBook.autores.map(autor => autor.nome) : ["Autor desconhecido"]
+          }}
         />
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Providers>
+      <HomePage />
+    </Providers>
   );
 }

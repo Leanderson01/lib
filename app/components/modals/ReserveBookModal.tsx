@@ -12,6 +12,7 @@ interface ReserveBookModalProps {
     title: string;
     publishYear: string;
     publisher: string;
+    authors: string[];
   };
 }
 
@@ -56,6 +57,7 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
           <Text fw={500}>{bookData.title}</Text>
           <Text size="sm">Ano de Publicação: {bookData.publishYear}</Text>
           <Text size="sm">Editora: {bookData.publisher}</Text>
+          <Text size="sm">Autores: {bookData.authors.join(', ')}</Text>
           
           <Group justify="end" mt="xl">
             <Button 
