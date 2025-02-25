@@ -4,11 +4,15 @@ import { DatePickerInput } from '@mantine/dates';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { reservasService } from '@/app/services/reservas.service';
+import { notifications } from '@mantine/notifications';
 
 interface ReserveBookModalProps {
   opened: boolean;
   onClose: () => void;
   bookData: {
+    id?: number;
     title: string;
     publishYear: string;
     publisher: string;
@@ -19,37 +23,71 @@ interface ReserveBookModalProps {
 export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [reserveDate, setReserveDate] = useState<Date | null>(null);
-  const [returnDate, setReturnDate] = useState<Date | null>(null);
+  const queryClient = useQueryClient();
 
   const today = new Date();
   const maxDate = dayjs(today).add(3, 'month').toDate(); // Máximo de 3 meses para reserva
 
+  // Mutação para criar reserva
+  const criarReservaMutation = useMutation({
+    mutationFn: () => {
+      if (!bookData.id || !reserveDate) {
+        throw new Error('Dados incompletos para reserva');
+      }
+      
+      // Formatar a data para o formato aceito pelo MySQL (YYYY-MM-DD HH:MM:SS)
+      const formattedDate = reserveDate.toISOString().slice(0, 19).replace('T', ' ');
+      
+      return reservasService.criar({
+        livro_id: bookData.id,
+        data_reserva: formattedDate
+      });
+    },
+    onSuccess: () => {
+      // Invalidar queries para atualizar os dados
+      queryClient.invalidateQueries({ queryKey: ['reservas', 'minhas'] });
+      
+      notifications.show({
+        title: 'Sucesso',
+        message: 'Livro reservado com sucesso!',
+        color: 'green',
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Erro',
+        message: error instanceof Error 
+          ? error.message 
+          : 'Não foi possível realizar a reserva',
+        color: 'red',
+      });
+    }
+  });
+
   const handleConfirm = () => {
     if (step === 1) {
       setStep(2);
-    } else {
-      console.log('Dados da reserva:', {
-        book: bookData,
-        reserveDate,
-        returnDate
-      });
-      onClose();
-      setStep(1);
+    } else if (reserveDate) {
+      criarReservaMutation.mutate();
     }
   };
 
-  const handleCancel = () => {
+  const handleClose = () => {
     onClose();
     setStep(1);
+    setReserveDate(null);
   };
 
   return (
     <Modal 
       opened={opened} 
-      onClose={handleCancel}
-      title={step === 1 ? "Deseja reservar?" : "Selecione as Datas"}
+      onClose={handleClose}
+      title={step === 1 ? "Deseja reservar?" : "Selecione a Data"}
       centered
       size="md"
+      closeOnClickOutside={!criarReservaMutation.isPending}
+      closeOnEscape={!criarReservaMutation.isPending}
     >
       {step === 1 ? (
         <div className="space-y-4">
@@ -62,7 +100,7 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
           <Group justify="end" mt="xl">
             <Button 
               variant="subtle" 
-              onClick={handleCancel}
+              onClick={handleClose}
             >
               Não
             </Button>
@@ -79,7 +117,7 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
         <div className="space-y-6">
           <div className="space-y-4">
             <DatePickerInput
-              label="Reserva:"
+              label="Data da Reserva:"
               placeholder="DD/MM/AAAA"
               value={reserveDate}
               onChange={setReserveDate}
@@ -89,19 +127,8 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
               firstDayOfWeek={0}
               className="w-full"
               clearable={false}
-            />
-            <DatePickerInput
-              label="Devolução:"
-              placeholder="DD/MM/AAAA"
-              value={returnDate}
-              onChange={setReturnDate}
-              minDate={reserveDate || today}
-              maxDate={maxDate}
-              locale="pt-BR"
-              firstDayOfWeek={0}
-              className="w-full"
-              clearable={false}
-              disabled={!reserveDate}
+              disabled={criarReservaMutation.isPending}
+              valueFormat="DD/MM/YYYY"
             />
           </div>
 
@@ -109,11 +136,12 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
             <Button 
               variant="filled" 
               onClick={handleConfirm}
-              disabled={!reserveDate || !returnDate}
+              disabled={!reserveDate || criarReservaMutation.isPending}
+              loading={criarReservaMutation.isPending}
               fullWidth
               className='!bg-[#303A6B] hover:!bg-[#252d54] disabled:!bg-gray-200'
             >
-              Confirmar
+              {criarReservaMutation.isPending ? 'Reservando...' : 'Confirmar Reserva'}
             </Button>
           </Group>
         </div>

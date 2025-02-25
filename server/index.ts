@@ -33,13 +33,6 @@ interface Categoria {
   nome: string;
 }
 
-interface Reserva {
-  id: number;
-  livro_id: number;
-  data_reserva: string;
-  data_entrega: string;
-}
-
 // Configurar dotenv para ler o arquivo .env
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
@@ -293,45 +286,146 @@ app.get('/categorias/:id', async (req, res) => {
 // Rotas de Reservas
 app.get('/reservas', async (req, res) => {
   try {
-    const [rows] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM reservas');
-    res.json(rows as Reserva[]);
+    const [reservas] = await pool.execute<mysql.RowDataPacket[]>(`
+      SELECT r.*, l.titulo as livro_titulo, l.editora as livro_editora
+      FROM Reserva r
+      LEFT JOIN Livro l ON r.livro_id = l.livro_id
+      ORDER BY r.data_reserva DESC
+    `);
+    
+    res.json(reservas);
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao buscar reservas:', error);
     res.status(500).json({ message: 'Erro ao buscar reservas' });
+  }
+});
+
+// Rota para buscar reservas do usuário logado (simulado)
+app.get('/reservas/minhas', async (req, res) => {
+  try {
+    // Simulando um usuário logado com ID 1
+    const usuarioId = 1;
+    
+    const [reservas] = await pool.execute<mysql.RowDataPacket[]>(`
+      SELECT r.*, l.titulo as livro_titulo, l.editora as livro_editora, 
+             l.ano_publicacao as livro_ano_publicacao
+      FROM Reserva r
+      LEFT JOIN Livro l ON r.livro_id = l.livro_id
+      WHERE r.usuario_id = ?
+      ORDER BY r.data_reserva DESC
+    `, [usuarioId]);
+    
+    // Para cada reserva, buscar informações detalhadas do livro
+    const reservasDetalhadas = await Promise.all(Array.isArray(reservas) ? reservas.map(async (reserva) => {
+      if (reserva.livro_id) {
+        const [livros] = await pool.execute<mysql.RowDataPacket[]>(`
+          SELECT l.*, c.nome as categoria_nome
+          FROM Livro l
+          LEFT JOIN Categoria c ON l.categoria_id = c.categoria_id
+          WHERE l.livro_id = ?
+        `, [reserva.livro_id]);
+        
+        if (livros.length > 0) {
+          const livro = livros[0];
+          
+          // Buscar autores do livro
+          const [autores] = await pool.execute<mysql.RowDataPacket[]>(`
+            SELECT a.*
+            FROM Autor a
+            JOIN Livro_Autor la ON a.autor_id = la.autor_id
+            WHERE la.livro_id = ?
+          `, [reserva.livro_id]);
+          
+          return {
+            ...reserva,
+            livro: {
+              ...livro,
+              autores: autores
+            }
+          };
+        }
+      }
+      
+      return reserva;
+    }) : []);
+    
+    res.json(reservasDetalhadas);
+  } catch (error) {
+    console.error('Erro ao buscar reservas do usuário:', error);
+    res.status(500).json({ message: 'Erro ao buscar reservas do usuário' });
   }
 });
 
 app.post('/reservas', async (req, res) => {
   try {
-    const { livro_id, data_reserva, data_entrega } = req.body;
+    const { livro_id, data_reserva } = req.body;
+    
+    // Simulando um usuário logado com ID 1
+    const usuarioId = 1;
+    
+    // Verificar se o livro existe
+    const [livros] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Livro WHERE livro_id = ?', [livro_id]);
+    
+    if (livros.length === 0) {
+      return res.status(404).json({ message: 'Livro não encontrado' });
+    }
+    
+    // Usar a data fornecida ou a data atual formatada corretamente
+    const dataReserva = data_reserva || new Date().toISOString().slice(0, 19).replace('T', ' ');
+    
+    // Inserir a reserva
     const [result] = await pool.execute<mysql.ResultSetHeader>(
-      'INSERT INTO reservas (livro_id, data_reserva, data_entrega) VALUES (?, ?, ?)',
-      [livro_id, data_reserva, data_entrega]
+      'INSERT INTO Reserva (usuario_id, livro_id, data_reserva, status) VALUES (?, ?, ?, ?)',
+      [usuarioId, livro_id, dataReserva, 'ATIVA']
     );
     
-    const novaReserva: Reserva = {
-      id: result.insertId,
+    const novaReserva = {
+      reserva_id: result.insertId,
+      usuario_id: usuarioId,
       livro_id,
-      data_reserva,
-      data_entrega
+      data_reserva: dataReserva,
+      status: 'ATIVA'
     };
     
-    res.json({ 
+    res.status(201).json({ 
       message: 'Reserva criada com sucesso',
       reserva: novaReserva
     });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao criar reserva:', error);
     res.status(500).json({ message: 'Erro ao criar reserva' });
   }
 });
 
-app.delete('/reservas/:id', async (req, res) => {
+app.patch('/reservas/:id/cancelar', async (req, res) => {
   try {
-    await pool.execute('DELETE FROM reservas WHERE id = ?', [req.params.id]);
-    res.json({ message: 'Reserva cancelada com sucesso' });
+    const reservaId = req.params.id;
+    
+    // Verificar se a reserva existe
+    const [reservas] = await pool.execute<mysql.RowDataPacket[]>(
+      'SELECT * FROM Reserva WHERE reserva_id = ?',
+      [reservaId]
+    );
+    
+    if (reservas.length === 0) {
+      return res.status(404).json({ message: 'Reserva não encontrada' });
+    }
+    
+    // Atualizar o status da reserva
+    await pool.execute(
+      'UPDATE Reserva SET status = ? WHERE reserva_id = ?',
+      ['CANCELADA', reservaId]
+    );
+    
+    res.json({ 
+      message: 'Reserva cancelada com sucesso',
+      reserva: {
+        ...reservas[0],
+        status: 'CANCELADA'
+      }
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao cancelar reserva:', error);
     res.status(500).json({ message: 'Erro ao cancelar reserva' });
   }
 });
@@ -358,6 +452,33 @@ app.get('/usuarios/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar usuário' });
+  }
+});
+
+// Rota para buscar o usuário atual (baseado no token)
+app.get('/usuarios/atual', async (req, res) => {
+  try {
+    // Obter o token do cabeçalho Authorization
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token não fornecido ou inválido' });
+    }
+    
+    // Em um sistema real, você decodificaria o token JWT para obter o ID do usuário
+    // Aqui, estamos simulando isso usando o usuário com ID 1
+    const usuarioId = 1;
+    
+    const [rows] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Usuario WHERE usuario_id = ?', [usuarioId]);
+    
+    if (rows.length > 0) {
+      res.json(rows[0] as Usuario);
+    } else {
+      res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar usuário atual' });
   }
 });
 

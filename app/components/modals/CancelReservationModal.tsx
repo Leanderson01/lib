@@ -6,13 +6,15 @@ interface CancelReservationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   bookTitle: string;
+  isLoading?: boolean;
 }
 
 export function CancelReservationModal({ 
   opened, 
   onClose, 
   onConfirm,
-  bookTitle 
+  bookTitle,
+  isLoading = false
 }: CancelReservationModalProps) {
   return (
     <Modal 
@@ -21,6 +23,8 @@ export function CancelReservationModal({
       title="Deseja cancelar a reserva?"
       centered
       size="sm"
+      closeOnClickOutside={!isLoading}
+      closeOnEscape={!isLoading}
     >
       <div className="space-y-4">
         <Text>
@@ -34,6 +38,7 @@ export function CancelReservationModal({
             color="gray"
             onClick={onClose}
             fullWidth
+            disabled={isLoading}
           >
             Não
           </Button>
@@ -42,8 +47,9 @@ export function CancelReservationModal({
             color="red"
             onClick={onConfirm}
             fullWidth
+            loading={isLoading}
           >
-            Sim, cancelar
+            {isLoading ? 'Cancelando...' : 'Sim, cancelar'}
           </Button>
         </Group>
       </div>

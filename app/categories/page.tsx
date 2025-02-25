@@ -7,9 +7,11 @@ import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { categoriasService } from "../services";
 import Providers from "../providers";
+import { useAuth } from "../hooks/useAuth";
 
 function CategoriesPage() {
   const router = useRouter();
+  useAuth(); // Adicionando proteção de rota
 
   // Buscar dados reais do servidor
   const { data: categorias = [], isLoading } = useQuery({

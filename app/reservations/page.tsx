@@ -1,51 +1,97 @@
 'use client';
-import { Text, Button, Avatar, Table } from "@mantine/core";
+import { Text, Button, Avatar, Table, Loader } from "@mantine/core";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { CancelReservationModal } from "../components/modals/CancelReservationModal";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { reservasService } from "../services/reservas.service";
+import { usuariosService } from "../services/usuarios.service";
+import { notifications } from '@mantine/notifications';
+import Providers from "../providers";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Reserva, Livro } from "../services/types";
 
-export default function Reservations() {
+// Interface para reserva com detalhes do livro
+interface ReservaDetalhada extends Reserva {
+  livro?: Livro;
+}
+
+function ReservationsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<{
     id: number;
     bookTitle: string;
   } | null>(null);
 
-  // Mock data - No futuro, isso virá da API
-  const mockUser = {
-    name: "Nome",
-    primaryEmail: "E-mail Principal",
-    secondaryEmail: "E-mail Secundário",
-    primaryPhone: "(00) 0 0000-0000",
-    secondaryPhone: "(00) 0 0000-0000",
-  };
+  // Buscar dados do usuário logado
+  const { 
+    data: usuario, 
+    isLoading: isLoadingUsuario 
+  } = useQuery({
+    queryKey: ['usuario', 'atual'],
+    queryFn: usuariosService.obterUsuarioAtual
+  });
 
-  const mockReservations = Array(5).fill(null).map((_, index) => ({
-    id: index + 1,
-    bookTitle: "Título do Livro",
-    reserveDate: "01/03/2024",
-    returnDate: "15/03/2024"
-  }));
+  // Buscar reservas do usuário
+  const { 
+    data: reservas = [], 
+    isLoading: isLoadingReservas 
+  } = useQuery({
+    queryKey: ['reservas', 'minhas'],
+    queryFn: reservasService.listarMinhasReservas
+  });
 
-  const handleCancelClick = (reservation: typeof mockReservations[0]) => {
+  // Mutação para cancelar reserva
+  const cancelarReservaMutation = useMutation({
+    mutationFn: (reservaId: number) => reservasService.cancelar(reservaId),
+    onSuccess: () => {
+      notifications.show({
+        title: 'Sucesso',
+        message: 'Reserva cancelada com sucesso',
+        color: 'green',
+      });
+      queryClient.invalidateQueries({ queryKey: ['reservas', 'minhas'] });
+    },
+    onError: (error) => {
+      notifications.show({
+        title: 'Erro',
+        message: 'Não foi possível cancelar a reserva',
+        color: 'red',
+      });
+      console.error('Erro ao cancelar reserva:', error);
+    }
+  });
+
+  const handleCancelClick = (reserva: ReservaDetalhada) => {
     setSelectedReservation({
-      id: reservation.id,
-      bookTitle: reservation.bookTitle
+      id: reserva.reserva_id,
+      bookTitle: reserva.livro?.titulo || 'Livro'
     });
     setModalOpened(true);
   };
 
   const handleConfirmCancel = () => {
     if (selectedReservation) {
-      console.log('Cancelando reserva:', selectedReservation.id);
-      // Aqui será feita a chamada para a API para cancelar a reserva
+      cancelarReservaMutation.mutate(selectedReservation.id);
     }
     setModalOpened(false);
     setSelectedReservation(null);
+  };
+
+  // Função para formatar a data
+  const formatarData = (dataString: string) => {
+    try {
+      const data = new Date(dataString);
+      return format(data, 'dd/MM/yyyy', { locale: ptBR });
+    } catch {
+      return 'Data inválida';
+    }
   };
 
   return (
@@ -66,61 +112,76 @@ export default function Reservations() {
 
         {/* User Info Section */}
         <section className="bg-white rounded-lg p-6 shadow-sm mb-8">
-          <div className="flex items-start gap-6">
-            <Avatar size="xl" radius="xl" className="!h-24 !w-24" />
-            <div className="flex-1 space-y-2">
-              <Text fw={700} size="xl">{mockUser.name}</Text>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <Text size="sm">
-                  <Text span fw={500}>E-mail Principal:</Text> {mockUser.primaryEmail}
-                </Text>
-                <Text size="sm">
-                  <Text span fw={500}>E-mail Secundário:</Text> {mockUser.secondaryEmail}
-                </Text>
-                <Text size="sm">
-                  <Text span fw={500}>Telefone 1:</Text> {mockUser.primaryPhone}
-                </Text>
-                <Text size="sm">
-                  <Text span fw={500}>Telefone 2:</Text> {mockUser.secondaryPhone}
-                </Text>
+          {isLoadingUsuario ? (
+            <div className="flex justify-center py-4">
+              <Loader />
+            </div>
+          ) : !usuario ? (
+            <Text ta="center">Não foi possível carregar os dados do usuário</Text>
+          ) : (
+            <div className="flex items-start gap-6">
+              <Avatar size="xl" radius="xl" className="!h-24 !w-24" />
+              <div className="flex-1 space-y-2">
+                <Text fw={700} size="xl">{usuario.nome}</Text>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Text size="sm">
+                    <Text span fw={500}>E-mail:</Text> {usuario.email}
+                  </Text>
+                  {usuario.telefone && (
+                    <Text size="sm">
+                      <Text span fw={500}>Telefone:</Text> {usuario.telefone}
+                    </Text>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* Reservations Section */}
         <section className="bg-white rounded-lg p-6 shadow-sm">
           <Text fw={700} size="lg" mb="md">Minhas Reservas</Text>
           
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Título</Table.Th>
-                <Table.Th>Data de Reserva</Table.Th>
-                <Table.Th>Data de Entrega</Table.Th>
-                <Table.Th>Ações</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {mockReservations.map((reservation) => (
-                <Table.Tr key={reservation.id}>
-                  <Table.Td>{reservation.bookTitle}</Table.Td>
-                  <Table.Td>{reservation.reserveDate}</Table.Td>
-                  <Table.Td>{reservation.returnDate}</Table.Td>
-                  <Table.Td>
-                    <Button
-                      variant="subtle"
-                      color="red"
-                      onClick={() => handleCancelClick(reservation)}
-                      leftSection={<Trash2 size={16} />}
-                    >
-                      Cancelar
-                    </Button>
-                  </Table.Td>
+          {isLoadingReservas ? (
+            <div className="flex justify-center py-8">
+              <Loader />
+            </div>
+          ) : reservas.length === 0 ? (
+            <Text ta="center" py="lg">Você não possui reservas ativas.</Text>
+          ) : (
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Título</Table.Th>
+                  <Table.Th>Data de Reserva</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Ações</Table.Th>
                 </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+              </Table.Thead>
+              <Table.Tbody>
+                {(reservas as ReservaDetalhada[]).map((reserva) => (
+                  <Table.Tr key={reserva.reserva_id}>
+                    <Table.Td>{reserva.livro?.titulo || 'Livro não encontrado'}</Table.Td>
+                    <Table.Td>{formatarData(reserva.data_reserva || '')}</Table.Td>
+                    <Table.Td>{reserva.status}</Table.Td>
+                    <Table.Td>
+                      {reserva.status === 'ATIVA' && (
+                        <Button
+                          variant="subtle"
+                          color="red"
+                          onClick={() => handleCancelClick(reserva)}
+                          leftSection={<Trash2 size={16} />}
+                          loading={cancelarReservaMutation.isPending}
+                        >
+                          Cancelar
+                        </Button>
+                      )}
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          )}
         </section>
       </main>
 
@@ -135,8 +196,17 @@ export default function Reservations() {
           }}
           onConfirm={handleConfirmCancel}
           bookTitle={selectedReservation.bookTitle}
+          isLoading={cancelarReservaMutation.isPending}
         />
       )}
     </div>
+  );
+}
+
+export default function Reservations() {
+  return (
+    <Providers>
+      <ReservationsPage />
+    </Providers>
   );
 } 

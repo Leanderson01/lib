@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { livrosService, autoresService } from "../../services";
 import { Livro } from "../../services/types";
 import Providers from "../../providers";
+import { useAuth } from "../../hooks/useAuth";
 
 interface PageProps {
   params: {
@@ -20,6 +21,8 @@ interface PageProps {
 
 function AuthorBooksPage({ params }: PageProps) {
   const router = useRouter();
+  useAuth(); // Adicionando proteção de rota
+  
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);
   const autorId = parseInt(params.id);
@@ -111,6 +114,7 @@ function AuthorBooksPage({ params }: PageProps) {
             setSelectedBook(null);
           }}
           bookData={{
+            id: selectedBook.livro_id,
             title: selectedBook.titulo,
             publishYear: selectedBook.ano_publicacao?.toString() || "Ano desconhecido",
             publisher: selectedBook.editora || "Editora desconhecida",

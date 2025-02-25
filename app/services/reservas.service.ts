@@ -1,17 +1,19 @@
 import { api } from './api';
-import { Reserva, Livro } from './types';
+import { Reserva, Livro, Usuario } from './types';
 
-interface ReservaComLivro extends Reserva {
-  livro: Livro;
+export interface ReservaDetalhada extends Reserva {
+  livro?: Livro;
+  usuario?: Usuario;
 }
 
 interface CriarReservaData {
   livro_id: number;
+  data_reserva?: string;
 }
 
 export const reservasService = {
   async listarMinhasReservas() {
-    const response = await api.get<ReservaComLivro[]>('/reservas');
+    const response = await api.get<ReservaDetalhada[]>('/reservas/minhas');
     return response.data;
   },
 
@@ -21,7 +23,7 @@ export const reservasService = {
   },
 
   async cancelar(id: number) {
-    const response = await api.patch<Reserva>(`/reservas/${id}`, {
+    const response = await api.patch<Reserva>(`/reservas/${id}/cancelar`, {
       status: 'CANCELADA'
     });
     return response.data;

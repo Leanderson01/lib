@@ -34,6 +34,9 @@ function LoginForm() {
       // Armazenar o token
       localStorage.setItem('token', data.token);
       
+      // Armazenar os dados do usuário
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
       // Mostrar notificação de sucesso
       notifications.show({
         title: 'Login realizado com sucesso!',
