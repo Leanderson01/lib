@@ -28,6 +28,12 @@ export const usuariosService = {
     
     // Se não tiver no localStorage ou ocorrer algum erro, buscar da API
     const response = await api.get<Usuario>('/usuarios/atual');
+    
+    // Armazenar os dados do usuário no localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    
     return response.data;
   }
 }; 

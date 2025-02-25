@@ -8,10 +8,16 @@ import { useQuery } from "@tanstack/react-query";
 import { autoresService } from "../services";
 import Providers from "../providers";
 import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
 
 function AuthorsPage() {
   const router = useRouter();
-  useAuth(); // Adicionando proteção de rota
+  const { updateUserData } = useAuth(); // Adicionando proteção de rota
+
+  // Atualizar dados do usuário ao carregar a página
+  useEffect(() => {
+    updateUserData();
+  }, []);
 
   // Buscar dados reais do servidor
   const { data: autores = [], isLoading } = useQuery({

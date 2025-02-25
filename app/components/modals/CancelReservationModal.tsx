@@ -1,5 +1,7 @@
 'use client';
 import { Modal, Text, Button, Group } from '@mantine/core';
+import { useEffect } from 'react';
+import { useAuth } from '@/app/hooks/useAuth';
 
 interface CancelReservationModalProps {
   opened: boolean;
@@ -16,6 +18,15 @@ export function CancelReservationModal({
   bookTitle,
   isLoading = false
 }: CancelReservationModalProps) {
+  const { updateUserData } = useAuth();
+
+  // Atualizar dados do usuário ao abrir o modal
+  useEffect(() => {
+    if (opened) {
+      updateUserData();
+    }
+  }, [opened, updateUserData]);
+
   return (
     <Modal 
       opened={opened} 

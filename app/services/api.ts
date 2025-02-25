@@ -14,9 +14,25 @@ export const api = axios.create({
 
 // Interceptor para adicionar token JWT
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Verificar se estamos no ambiente do navegador
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      
+      // Adicionar o ID do usuário no cabeçalho X-User-ID
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user && user.usuario_id) {
+            config.headers['X-User-ID'] = user.usuario_id;
+          }
+        } catch (error) {
+          console.error('Erro ao parsear dados do usuário:', error);
+        }
+      }
+    }
   }
   return config;
 });
@@ -30,6 +46,12 @@ api.interceptors.response.use(
     }
     
     if (error.response?.status === 401) {
+      // Se estamos no navegador e recebemos um erro 401, podemos redirecionar para a página de login
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
+      }
       throw new Error(error.response.data.message || 'Credenciais inválidas');
     }
 

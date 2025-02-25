@@ -9,10 +9,16 @@ import { usuariosService } from "../services/usuarios.service";
 import Providers from "../providers";
 import { useForm } from "@mantine/form";
 import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
 
 function ProfilePage() {
   const router = useRouter();
-  useAuth(); // Isso vai verificar a autenticação e redirecionar se necessário
+  const { updateUserData } = useAuth(); // Isso vai verificar a autenticação e redirecionar se necessário
+
+  // Atualizar dados do usuário ao carregar a página
+  useEffect(() => {
+    updateUserData();
+  }, []);
 
   // Buscar dados do usuário logado
   const { data: usuario, isLoading } = useQuery({

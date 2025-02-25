@@ -7,7 +7,7 @@ import { CategoryCard } from "./components/cards/CategoryCard";
 import { AuthorCard } from "./components/cards/AuthorCard";
 import { SeeMoreButton } from "./components/buttons/SeeMoreButton";
 import { ReserveBookModal } from "./components/modals/ReserveBookModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { livrosService, autoresService, categoriasService } from "./services";
@@ -17,7 +17,12 @@ import { useAuth } from "./hooks/useAuth";
 
 function HomePage() {
   const router = useRouter();
-  useAuth(); // Adicionando proteção de rota
+  const { updateUserData } = useAuth(); // Adicionando proteção de rota
+  
+  // Atualizar dados do usuário ao carregar a página
+  useEffect(() => {
+    updateUserData();
+  }, []);
   
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);

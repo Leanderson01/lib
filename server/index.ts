@@ -3,6 +3,7 @@ import mysql from 'mysql2/promise';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 
 // Interfaces para tipagem
 interface Usuario {
@@ -46,7 +47,12 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+}));
+// @ts-expect-error - Ignorando erro de tipagem do cookie-parser
+app.use(cookieParser());
 
 // Conexão com o banco de dados
 const pool = mysql.createPool({
@@ -89,6 +95,39 @@ pool.getConnection()
     console.error('Erro ao conectar com o banco de dados:', err);
   });
 
+// Função auxiliar para obter o ID do usuário a partir do token
+const getUserIdFromToken = (req: express.Request) => {
+  // Verificar se temos o ID do usuário no cabeçalho X-User-ID
+  const userIdHeader = req.headers['x-user-id'];
+  if (userIdHeader) {
+    return Number(userIdHeader);
+  }
+  
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  
+  try {
+    // Em um sistema real, você usaria uma biblioteca como jsonwebtoken para verificar e decodificar o token
+    // const token = authHeader.split(' ')[1];
+    // const decoded = jwt.verify(token, 'seu_segredo_jwt');
+    // return decoded.userId;
+    
+    // Verificar se temos o ID do usuário nos cookies
+    if (req.cookies && req.cookies.userId) {
+      return Number(req.cookies.userId);
+    }
+    
+    // Se não conseguirmos extrair o ID do usuário de nenhuma fonte, retornar null
+    return null;
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error);
+    return null;
+  }
+};
+
 // Rotas de Autenticação
 app.post('/auth/login', async (req, res) => {
   try {
@@ -100,6 +139,14 @@ app.post('/auth/login', async (req, res) => {
     
     if (rows.length > 0) {
       const user = rows[0] as Usuario;
+      
+      // Definir um cookie com o ID do usuário
+      res.cookie('userId', user.usuario_id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
+      });
+      
       res.json({ 
         token: 'jwt_token_aqui', 
         user: {
@@ -300,11 +347,15 @@ app.get('/reservas', async (req, res) => {
   }
 });
 
-// Rota para buscar reservas do usuário logado (simulado)
+// Rota para buscar reservas do usuário logado
 app.get('/reservas/minhas', async (req, res) => {
   try {
-    // Simulando um usuário logado com ID 1
-    const usuarioId = 1;
+    // Obter o ID do usuário a partir do token
+    const usuarioId = getUserIdFromToken(req);
+    
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Token não fornecido ou inválido' });
+    }
     
     const [reservas] = await pool.execute<mysql.RowDataPacket[]>(`
       SELECT r.*, l.titulo as livro_titulo, l.editora as livro_editora, 
@@ -360,8 +411,12 @@ app.post('/reservas', async (req, res) => {
   try {
     const { livro_id, data_reserva } = req.body;
     
-    // Simulando um usuário logado com ID 1
-    const usuarioId = 1;
+    // Obter o ID do usuário a partir do token
+    const usuarioId = getUserIdFromToken(req);
+    
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Token não fornecido ou inválido' });
+    }
     
     // Verificar se o livro existe
     const [livros] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Livro WHERE livro_id = ?', [livro_id]);
@@ -401,14 +456,21 @@ app.patch('/reservas/:id/cancelar', async (req, res) => {
   try {
     const reservaId = req.params.id;
     
-    // Verificar se a reserva existe
+    // Obter o ID do usuário a partir do token
+    const usuarioId = getUserIdFromToken(req);
+    
+    if (!usuarioId) {
+      return res.status(401).json({ message: 'Token não fornecido ou inválido' });
+    }
+    
+    // Verificar se a reserva existe e pertence ao usuário logado
     const [reservas] = await pool.execute<mysql.RowDataPacket[]>(
-      'SELECT * FROM Reserva WHERE reserva_id = ?',
-      [reservaId]
+      'SELECT * FROM Reserva WHERE reserva_id = ? AND usuario_id = ?',
+      [reservaId, usuarioId]
     );
     
     if (reservas.length === 0) {
-      return res.status(404).json({ message: 'Reserva não encontrada' });
+      return res.status(404).json({ message: 'Reserva não encontrada ou não pertence ao usuário logado' });
     }
     
     // Atualizar o status da reserva
@@ -441,33 +503,15 @@ app.get('/usuarios', async (req, res) => {
   }
 });
 
-app.get('/usuarios/:id', async (req, res) => {
-  try {
-    const [rows] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Usuario WHERE usuario_id = ?', [req.params.id]);
-    if (rows.length > 0) {
-      res.json(rows[0] as Usuario);
-    } else {
-      res.status(404).json({ message: 'Usuário não encontrado' });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao buscar usuário' });
-  }
-});
-
 // Rota para buscar o usuário atual (baseado no token)
 app.get('/usuarios/atual', async (req, res) => {
   try {
-    // Obter o token do cabeçalho Authorization
-    const authHeader = req.headers.authorization;
+    // Obter o ID do usuário a partir do token
+    const usuarioId = getUserIdFromToken(req);
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!usuarioId) {
       return res.status(401).json({ message: 'Token não fornecido ou inválido' });
     }
-    
-    // Em um sistema real, você decodificaria o token JWT para obter o ID do usuário
-    // Aqui, estamos simulando isso usando o usuário com ID 1
-    const usuarioId = 1;
     
     const [rows] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Usuario WHERE usuario_id = ?', [usuarioId]);
     
@@ -479,6 +523,20 @@ app.get('/usuarios/atual', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar usuário atual' });
+  }
+});
+
+app.get('/usuarios/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.execute<mysql.RowDataPacket[]>('SELECT * FROM Usuario WHERE usuario_id = ?', [req.params.id]);
+    if (rows.length > 0) {
+      res.json(rows[0] as Usuario);
+    } else {
+      res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar usuário' });
   }
 });
 
@@ -551,4 +609,4 @@ app.get('/livros/autor/:id', async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
-}); 
+});

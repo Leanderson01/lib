@@ -1,12 +1,14 @@
 'use client';
 import { Modal, Text, Button, Group } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { reservasService } from '@/app/services/reservas.service';
 import { notifications } from '@mantine/notifications';
+import { useAuth } from '@/app/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 interface ReserveBookModalProps {
   opened: boolean;
@@ -24,6 +26,15 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
   const [step, setStep] = useState<1 | 2>(1);
   const [reserveDate, setReserveDate] = useState<Date | null>(null);
   const queryClient = useQueryClient();
+  const { isAuthenticated, updateUserData } = useAuth();
+  const router = useRouter();
+
+  // Atualizar dados do usuário ao abrir o modal
+  useEffect(() => {
+    if (opened) {
+      updateUserData();
+    }
+  }, [opened, updateUserData]);
 
   const today = new Date();
   const maxDate = dayjs(today).add(3, 'month').toDate(); // Máximo de 3 meses para reserva
@@ -31,6 +42,12 @@ export function ReserveBookModal({ opened, onClose, bookData }: ReserveBookModal
   // Mutação para criar reserva
   const criarReservaMutation = useMutation({
     mutationFn: () => {
+      // Verificar se o usuário está autenticado
+      if (!isAuthenticated()) {
+        router.push('/auth/login');
+        throw new Error('Você precisa estar logado para fazer uma reserva');
+      }
+
       if (!bookData.id || !reserveDate) {
         throw new Error('Dados incompletos para reserva');
       }

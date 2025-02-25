@@ -13,19 +13,34 @@ interface CriarReservaData {
 
 export const reservasService = {
   async listarMinhasReservas() {
-    const response = await api.get<ReservaDetalhada[]>('/reservas/minhas');
-    return response.data;
+    try {
+      const response = await api.get<ReservaDetalhada[]>('/reservas/minhas');
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao listar reservas:', error);
+      throw error;
+    }
   },
 
   async criar(data: CriarReservaData) {
-    const response = await api.post<Reserva>('/reservas', data);
-    return response.data;
+    try {
+      const response = await api.post<Reserva>('/reservas', data);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar reserva:', error);
+      throw error;
+    }
   },
 
   async cancelar(id: number) {
-    const response = await api.patch<Reserva>(`/reservas/${id}/cancelar`, {
-      status: 'CANCELADA'
-    });
-    return response.data;
+    try {
+      const response = await api.patch<Reserva>(`/reservas/${id}/cancelar`, {
+        status: 'CANCELADA'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao cancelar reserva:', error);
+      throw error;
+    }
   }
 }; 

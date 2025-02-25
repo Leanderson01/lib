@@ -5,29 +5,33 @@ import { Footer } from "../components/layout/Footer";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { CancelReservationModal } from "../components/modals/CancelReservationModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { reservasService } from "../services/reservas.service";
+import { reservasService, ReservaDetalhada } from "../services/reservas.service";
 import { usuariosService } from "../services/usuarios.service";
 import { notifications } from '@mantine/notifications';
 import Providers from "../providers";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Reserva, Livro } from "../services/types";
-
-// Interface para reserva com detalhes do livro
-interface ReservaDetalhada extends Reserva {
-  livro?: Livro;
-}
+import { useAuth } from "../hooks/useAuth";
 
 function ReservationsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { updateUserData, isAuthenticated } = useAuth();
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<{
     id: number;
     bookTitle: string;
   } | null>(null);
+
+  // Atualizar dados do usuário ao carregar a página
+  useEffect(() => {
+    updateUserData();
+  }, [updateUserData]);
+
+  // Verificar se o usuário está autenticado
+  const autenticado = isAuthenticated();
 
   // Buscar dados do usuário logado
   const { 
@@ -35,7 +39,8 @@ function ReservationsPage() {
     isLoading: isLoadingUsuario 
   } = useQuery({
     queryKey: ['usuario', 'atual'],
-    queryFn: usuariosService.obterUsuarioAtual
+    queryFn: usuariosService.obterUsuarioAtual,
+    enabled: autenticado // Só buscar se estiver autenticado
   });
 
   // Buscar reservas do usuário
@@ -44,7 +49,9 @@ function ReservationsPage() {
     isLoading: isLoadingReservas 
   } = useQuery({
     queryKey: ['reservas', 'minhas'],
-    queryFn: reservasService.listarMinhasReservas
+    queryFn: reservasService.listarMinhasReservas,
+    enabled: autenticado, // Só buscar se estiver autenticado
+    retry: 1 // Limitar o número de tentativas em caso de erro
   });
 
   // Mutação para cancelar reserva
@@ -58,7 +65,7 @@ function ReservationsPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['reservas', 'minhas'] });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       notifications.show({
         title: 'Erro',
         message: 'Não foi possível cancelar a reserva',

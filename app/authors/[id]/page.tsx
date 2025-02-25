@@ -4,7 +4,7 @@ import { Header } from "../../components/layout/Header";
 import { Footer } from "../../components/layout/Footer";
 import { BookCard } from "../../components/cards/BookCard";
 import { ReserveBookModal } from "../../components/modals/ReserveBookModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,12 @@ interface PageProps {
 
 function AuthorBooksPage({ params }: PageProps) {
   const router = useRouter();
-  useAuth(); // Adicionando proteção de rota
+  const { updateUserData } = useAuth(); // Adicionando proteção de rota
+  
+  // Atualizar dados do usuário ao carregar a página
+  useEffect(() => {
+    updateUserData();
+  }, []);
   
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);

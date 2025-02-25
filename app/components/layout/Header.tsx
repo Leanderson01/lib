@@ -6,11 +6,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usuariosService } from "@/app/services/usuarios.service";
 import { ChevronDown, User, LogOut, BookMarked } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
+import { useEffect } from "react";
 
 export function Header() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { logout } = useAuth();
+  const { logout, updateUserData } = useAuth();
+
+  // Atualizar dados do usuário ao montar o componente
+  useEffect(() => {
+    updateUserData();
+  }, []);
 
   // Buscar dados do usuário logado
   const { data: usuario, isLoading } = useQuery({
