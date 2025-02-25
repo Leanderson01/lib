@@ -22,7 +22,7 @@ function HomePage() {
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
   
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);

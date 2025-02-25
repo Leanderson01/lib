@@ -17,7 +17,7 @@ function AuthorsPage() {
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
 
   // Buscar dados reais do servidor
   const { data: autores = [], isLoading } = useQuery({

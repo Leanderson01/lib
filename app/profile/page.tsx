@@ -18,7 +18,7 @@ function ProfilePage() {
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
 
   // Buscar dados do usuário logado
   const { data: usuario, isLoading } = useQuery({

@@ -13,24 +13,30 @@ import { Livro } from "../../services/types";
 import Providers from "../../providers";
 import { useAuth } from "../../hooks/useAuth";
 
+// Define the props for the client component
+interface AuthorBooksPageProps {
+  id: string;
+}
+
+// Define the props for the page component
 interface PageProps {
   params: {
     id: string;
   };
 }
 
-function AuthorBooksPage({ params }: PageProps) {
+function AuthorBooksPage({ id }: AuthorBooksPageProps) {
   const router = useRouter();
   const { updateUserData } = useAuth(); // Adicionando proteção de rota
   
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
   
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);
-  const autorId = parseInt(params.id);
+  const autorId = parseInt(id);
 
   // Buscar dados do autor
   const { data: autor, isLoading: isLoadingAutor } = useQuery({
@@ -131,10 +137,11 @@ function AuthorBooksPage({ params }: PageProps) {
   );
 }
 
+// This is the main page component that Next.js will use
 export default function AuthorBooks({ params }: PageProps) {
   return (
     <Providers>
-      <AuthorBooksPage params={params} />
+      <AuthorBooksPage id={params.id} />
     </Providers>
   );
 } 

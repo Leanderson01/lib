@@ -13,24 +13,30 @@ import { Livro } from "../../services/types";
 import Providers from "../../providers";
 import { useAuth } from "../../hooks/useAuth";
 
+// Define the props for the client component
+interface CategoryBooksPageProps {
+  id: string;
+}
+
+// Define the props for the page component
 interface PageProps {
   params: {
     id: string;
   };
 }
 
-function CategoryBooksPage({ params }: PageProps) {
+function CategoryBooksPage({ id }: CategoryBooksPageProps) {
   const router = useRouter();
   const { updateUserData } = useAuth(); // Adicionando proteção de rota
   
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
   
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Livro | null>(null);
-  const categoriaId = parseInt(params.id);
+  const categoriaId = parseInt(id);
 
   // Buscar dados da categoria
   const { data: categoria, isLoading: isLoadingCategoria } = useQuery({
@@ -126,10 +132,11 @@ function CategoryBooksPage({ params }: PageProps) {
   );
 }
 
+// This is the main page component that Next.js will use
 export default function CategoryBooks({ params }: PageProps) {
   return (
     <Providers>
-      <CategoryBooksPage params={params} />
+      <CategoryBooksPage id={params.id} />
     </Providers>
   );
 } 

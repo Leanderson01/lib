@@ -16,7 +16,7 @@ export function Header() {
   // Atualizar dados do usuário ao montar o componente
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
 
   // Buscar dados do usuário logado
   const { data: usuario, isLoading } = useQuery({

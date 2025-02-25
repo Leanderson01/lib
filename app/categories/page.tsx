@@ -17,7 +17,7 @@ function CategoriesPage() {
   // Atualizar dados do usuário ao carregar a página
   useEffect(() => {
     updateUserData();
-  }, []);
+  }, [updateUserData]);
 
   // Buscar dados reais do servidor
   const { data: categorias = [], isLoading } = useQuery({
